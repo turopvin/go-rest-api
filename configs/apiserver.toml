@@ -1,1 +1,1 @@
-bind
+bind_addr = ":8080"
