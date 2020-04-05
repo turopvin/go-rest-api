@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"github.com/turopvin/go-rest-api/internal/app/apiserver"
+	"log"
+)
 
 func main() {
-	fmt.Println("Hello from a web-server!")
+	s := apiserver.New()
+	if err := s.Start(); err == nil {
+		log.Fatal(err)
+	}
 }
