@@ -1,2 +1,6 @@
 bind_addr = ":8080"
 log_level = "debug"
+
+[store]
+#database_url = "Server=localhost; Port=3304; Database=sfg_dev; Uid=root; Pwd=password"
+database_url = "root:password@tcp(localhost:3304)/sfg_dev"
