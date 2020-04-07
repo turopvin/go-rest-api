@@ -41,6 +41,11 @@ func (s *Store) Close() {
 
 }
 
+func (s *Store) InitCollections() {
+	database := s.db.Database("dev")
+	database.Collection("users")
+}
+
 func (s *Store) User() *UserRepository {
 	if s.userRepository != nil {
 		return s.userRepository
