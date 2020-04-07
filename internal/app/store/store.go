@@ -1,11 +1,16 @@
 package store
 
-import "database/sql"
+import (
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+)
 import _ "github.com/go-sql-driver/mysql"
 
 type Store struct {
 	config         *Config
-	db             *sql.DB
+	db             *mongo.Client
 	userRepository *UserRepository
 }
 
@@ -16,22 +21,24 @@ func New(config *Config) *Store {
 }
 
 func (s *Store) Open() error {
-	db, err := sql.Open("mysql", s.config.DataBaseURL)
+	//db, err := sql.Open("mysql", s.config.DataBaseURL)
+	client, err := mongo.NewClient(options.Client().ApplyURI(s.config.DataBaseURL))
 	if err != nil {
 		return nil
 	}
-
-	if err := db.Ping(); err != nil {
+	if err := client.Connect(context.TODO()); err != nil {
+		log.Fatal(err)
+	}
+	if err := client.Ping(context.TODO(), nil); err != nil {
 		return err
 	}
 
-	s.db = db
-
+	s.db = client
 	return nil
 }
 
 func (s *Store) Close() {
-	s.db.Close()
+
 }
 
 func (s *Store) User() *UserRepository {
@@ -42,4 +49,6 @@ func (s *Store) User() *UserRepository {
 	s.userRepository = &UserRepository{
 		store: s,
 	}
+
+	return s.userRepository
 }
