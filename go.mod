@@ -9,4 +9,5 @@ require (
 	github.com/sirupsen/logrus v1.5.0
 	github.com/stretchr/testify v1.5.1
 	go.mongodb.org/mongo-driver v1.3.1
+	golang.org/x/crypto v0.0.0-20200406173513-056763e48d71
 )

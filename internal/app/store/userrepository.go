@@ -12,6 +12,10 @@ type UserRepository struct {
 }
 
 func (r *UserRepository) Create(u *model.User) (*model.User, error) {
+	if err := u.BeforeCreate(); err != nil {
+		return nil, err
+	}
+
 	collection := r.store.db.Database("dev").Collection("users")
 	_, err := collection.InsertOne(context.TODO(), u)
 	if err != nil {
