@@ -21,7 +21,6 @@ func New(config *Config) *Store {
 }
 
 func (s *Store) Open() error {
-	//db, err := sql.Open("mysql", s.config.DataBaseURL)
 	client, err := mongo.NewClient(options.Client().ApplyURI(s.config.DataBaseURL))
 	if err != nil {
 		return nil
