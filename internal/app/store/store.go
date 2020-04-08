@@ -46,7 +46,7 @@ func (s *Store) InitCollections() {
 	database.Collection("users")
 }
 
-func (s *Store) User() *UserRepository {
+func (s *Store) UserService() *UserRepository {
 	if s.userRepository != nil {
 		return s.userRepository
 	}
