@@ -48,7 +48,7 @@ func (h *handler) handleUserCreate() http.HandlerFunc {
 		}
 
 		if err := h.store.User().Create(u); err != nil {
-			h.logger.Debug("something happened")
+			h.error(w, r, http.StatusInternalServerError, err)
 		}
 
 		u.Sanitize()
@@ -65,7 +65,7 @@ func (h *handler) handleGetUser() http.HandlerFunc {
 		}
 		user, err := h.store.User().FindByEmail(email)
 		if err != nil {
-			io.WriteString(w, "No such user found")
+			h.error(w, r, http.StatusNotFound, err)
 		}
 		json.NewEncoder(w).Encode(user)
 	}
