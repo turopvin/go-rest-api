@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	go build -v ./cmd/apiserver
+	CGO_ENABLED=0 GOOS=linux go build -o main -v ./cmd/apiserver
 
 .PHONY: test
 test:
