@@ -1,14 +1,17 @@
-FROM golang:alpine
+# Multi-stage build
 
+#First stage for bulding binary executable
+FROM golang:1.14.1 AS builder
+
+RUN mkdir /app
+ADD . /app
 WORKDIR /app
+RUN make build
 
-COPY go.mod go.sum ./
-RUN go mod download
-
-COPY . .
-
-RUN go build -v ./cmd/apiserver
+#Second stage only to run prepared binary executable
+COPY --from=builder /app/main /
+COPY --from=builder /app/configs /
 
 EXPOSE 8080
 
-ENTRYPOINT ["./apiserver"]
+ENTRYPOINT ["./main", "-config-path", "apiserver.toml"]
