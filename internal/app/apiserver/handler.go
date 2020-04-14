@@ -78,10 +78,12 @@ func (h *handler) handleGetUser() http.HandlerFunc {
 func (h *handler) handleMovieGet() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, err := h.movieapi.Movie().FindByTitle("inception")
+		movies, err := h.movieapi.Movie().FindByTitle("inception")
 		if err != nil {
 			h.error(w, r, http.StatusNotFound, err)
 		}
+
+		h.respond(w, r, http.StatusOK, json.NewEncoder(w).Encode(movies))
 	}
 }
 
