@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"github.com/turopvin/go-rest-api/internal/app/model"
+	"github.com/turopvin/go-rest-api/internal/app/movieapi"
 	"github.com/turopvin/go-rest-api/internal/app/store"
 	"io"
 	"net/http"
 )
 
 type handler struct {
-	store  store.Store
-	logger *logrus.Logger
+	store    store.Store
+	movieapi movieapi.MovieApi
+	logger   *logrus.Logger
 }
 
 func newhandler(s store.Store, l *logrus.Logger) *handler {
@@ -68,6 +70,16 @@ func (h *handler) handleGetUser() http.HandlerFunc {
 			h.error(w, r, http.StatusNotFound, err)
 		}
 		json.NewEncoder(w).Encode(user)
+	}
+}
+
+func (h *handler) handleMovieGet() http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		_, err := h.movieapi.Movie().FindByTitle("inception")
+		if err != nil {
+			h.error(w, r, http.StatusNotFound, err)
+		}
 	}
 }
 

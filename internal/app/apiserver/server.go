@@ -36,4 +36,5 @@ func (s *server) configureRouter() {
 	s.router.HandleFunc("/hello", handler.handleHello())
 	s.router.HandleFunc("/user/create", handler.handleUserCreate()).Methods("POST")
 	s.router.HandleFunc("/user/get", handler.handleGetUser())
+	s.router.HandleFunc("/movie/get/{}", handler.handleMovieGet())
 }
