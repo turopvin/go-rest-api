@@ -1,18 +1,18 @@
 package model
 
 type Movie struct {
-	popularity       float32 `json:"popularity"`
-	voteCount        int     `json:"vote_count"`
-	video            bool    `json:"video"`
-	posterPath       string  `json:"poster_path"`
-	id               int     `json:"id"`
-	adult            bool    `json:"adult"`
-	backdropPath     string  `json:"backdrop_path"`
-	originalLanguage string  `json:"original_language"`
-	originalTitle    string  `json:"original_title"`
-	genreIds         []int   `json:"genre_ids"`
-	title            string  `json:"title"`
-	voteAverage      float32 `json:"vote_average"`
-	overview         string  `json:"overview"`
-	releaseDate      string  `json:"release_date"`
+	Popularity       float32 `json:"popularity"`
+	VoteCount        int     `json:"vote_count"`
+	Video            bool    `json:"video"`
+	PosterPath       string  `json:"poster_path"`
+	Id               int     `json:"id"`
+	Adult            bool    `json:"adult"`
+	BackdropPath     string  `json:"backdrop_path"`
+	OriginalLanguage string  `json:"original_language"`
+	OriginalTitle    string  `json:"original_title"`
+	GenreIds         []int   `json:"genre_ids"`
+	Title            string  `json:"title"`
+	VoteAverage      float32 `json:"vote_average"`
+	Overview         string  `json:"overview"`
+	ReleaseDate      string  `json:"release_date"`
 }

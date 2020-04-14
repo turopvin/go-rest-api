@@ -9,16 +9,15 @@ import (
 )
 
 type MovieRepository struct {
-	apiurl   string `toml:"api_tmdb_base_url"`
-	apikey   string `toml:"api_tmdb_key"`
-	response response
+	apiurl string `toml:"api_tmdb_base_url"`
+	apikey string `toml:"api_tmdb_key"`
 }
 
 type response struct {
-	page         int           `json:"page"`
-	totalresults int           `json:"total_results"`
-	totalpages   int           `json:"total_pages"`
-	results      []model.Movie `json:"results"`
+	Page         int           `json:"page"`
+	TotalResults int           `json:"total_results"`
+	TotalPages   int           `json:"total_pages"`
+	Results      []model.Movie `json:"results"`
 }
 
 func NewMovieRepository(apiUrl, apiKey string) *MovieRepository {
@@ -54,7 +53,7 @@ func (m *MovieRepository) FindByTitle(title string) ([]model.Movie, error) {
 	}
 
 	var movies []model.Movie
-	for _, v := range r.results {
+	for _, v := range r.Results {
 		i := append(movies, v)
 		movies = i
 	}
