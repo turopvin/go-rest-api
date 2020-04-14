@@ -17,7 +17,7 @@ func Start(config *Config) error {
 	defer client.Disconnect(context.TODO())
 
 	store := mongostore.New(client)
-	srv := newServer(store)
+	srv := newServer(store, config)
 	return http.ListenAndServe(config.BindAddr, srv)
 }
 

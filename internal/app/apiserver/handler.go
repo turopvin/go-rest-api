@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/turopvin/go-rest-api/internal/app/model"
 	"github.com/turopvin/go-rest-api/internal/app/movieapi"
+	"github.com/turopvin/go-rest-api/internal/app/movieapi/tmdbapi"
 	"github.com/turopvin/go-rest-api/internal/app/store"
 	"io"
 	"net/http"
@@ -16,10 +17,11 @@ type handler struct {
 	logger   *logrus.Logger
 }
 
-func newhandler(s store.Store, l *logrus.Logger) *handler {
+func newhandler(s store.Store, c *Config, l *logrus.Logger) *handler {
 	return &handler{
-		store:  s,
-		logger: l,
+		store:    s,
+		movieapi: tmdbapi.New(c.ApiTmdbBaseUrl, c.ApiTmdbKey),
+		logger:   l,
 	}
 }
 

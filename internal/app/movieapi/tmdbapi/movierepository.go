@@ -21,6 +21,13 @@ type response struct {
 	results      []model.Movie `json:"results"`
 }
 
+func NewMovieRepository(apiUrl, apiKey string) *MovieRepository {
+	return &MovieRepository{
+		apiurl: apiUrl,
+		apikey: apiKey,
+	}
+}
+
 func (m *MovieRepository) FindByTitle(title string) ([]model.Movie, error) {
 	u, err := url.Parse(m.apiurl)
 	if err != nil {
@@ -40,10 +47,17 @@ func (m *MovieRepository) FindByTitle(title string) ([]model.Movie, error) {
 		log.Fatal(err)
 		return nil, err
 	}
-	if err = json.NewDecoder(resp.Body).Decode(m.response); err != nil {
+	r := &response{}
+	if err = json.NewDecoder(resp.Body).Decode(r); err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
 
-	return nil, nil
+	var movies []model.Movie
+	for _, v := range r.results {
+		i := append(movies, v)
+		movies = i
+	}
+
+	return movies, nil
 }
