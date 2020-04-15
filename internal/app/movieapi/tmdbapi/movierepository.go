@@ -52,11 +52,5 @@ func (m *MovieRepository) FindByTitle(title string) ([]model.Movie, error) {
 		return nil, err
 	}
 
-	var movies []model.Movie
-	for _, v := range r.Results {
-		i := append(movies, v)
-		movies = i
-	}
-
-	return movies, nil
+	return r.Results, nil
 }
