@@ -1,30 +1,30 @@
 package mongostore
 
 import (
-	"github.com/turopvin/go-rest-api/internal/app/store"
+	"github.com/turopvin/go-rest-api/internal/app/auth"
+	"github.com/turopvin/go-rest-api/internal/app/auth/repository"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-import _ "github.com/go-sql-driver/mysql"
 
 type Store struct {
-	dbClient       *mongo.Client
-	userRepository *UserRepository
+	db             *mongo.Database
+	userRepository auth.UserRepository
 }
 
-func New(dbClient *mongo.Client) *Store {
+func New(db *mongo.Database) *Store {
 	return &Store{
-		dbClient: dbClient,
+		db: db,
 	}
 }
 
-func (s *Store) User() store.UserRepository {
-	if s.userRepository != nil {
-		return s.userRepository
+func (t *Store) UserRepository() auth.UserRepository {
+	if t.userRepository != nil {
+		return t.userRepository
 	}
 
-	s.userRepository = &UserRepository{
-		store: s,
+	ur := &repository.UserRepository{
+		Collection: t.db.Collection("users"),
 	}
-
-	return s.userRepository
+	t.userRepository = ur
+	return ur
 }
