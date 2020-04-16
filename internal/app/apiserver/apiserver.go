@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"context"
+	"github.com/turopvin/go-rest-api/internal/app/auth/usecase"
 	"github.com/turopvin/go-rest-api/internal/app/store/mongostore"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -16,8 +17,11 @@ func Start(config *Config) error {
 	}
 	defer client.Disconnect(context.TODO())
 
-	store := mongostore.New(client)
-	srv := newServer(store, config)
+	//create repository for auth domain and pass it to use case
+	store := mongostore.New(client.Database("dev"))
+	useCase := usecase.New(store.UserRepository())
+
+	srv := newServer(useCase)
 	return http.ListenAndServe(config.BindAddr, srv)
 }
 

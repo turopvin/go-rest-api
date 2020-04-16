@@ -1,5 +1,7 @@
 package store
 
+import "github.com/turopvin/go-rest-api/internal/app/auth"
+
 type Store interface {
-	User() UserRepository
+	UserRepository() auth.UserRepository
 }
