@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/turopvin/go-rest-api/internal/app/auth"
 	"github.com/turopvin/go-rest-api/internal/app/auth/api"
+	"github.com/turopvin/go-rest-api/internal/app/movie"
 	"net/http"
 )
 
@@ -13,13 +14,13 @@ type server struct {
 	logger *logrus.Logger
 }
 
-func newServer(useCase auth.UseCase) *server {
+func newServer(auth auth.UseCase, useCase movie.UseCase) *server {
 	s := &server{
 		router: mux.NewRouter(),
 		logger: logrus.New(),
 	}
 
-	api.RegisterHttpEndPoints(s.router, useCase)
+	api.RegisterHttpEndPoints(s.router, auth)
 	return s
 }
 

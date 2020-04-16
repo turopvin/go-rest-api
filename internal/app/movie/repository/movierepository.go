@@ -1,4 +1,4 @@
-package tmdbapi
+package repository
 
 import (
 	"encoding/json"

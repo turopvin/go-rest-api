@@ -1,7 +1,7 @@
-package movieapi
+package movie
 
 import "github.com/turopvin/go-rest-api/internal/app/model"
 
-type MovieRepository interface {
+type Repository interface {
 	FindByTitle(title string) ([]model.Movie, error)
 }

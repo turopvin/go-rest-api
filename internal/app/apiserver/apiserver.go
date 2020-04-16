@@ -2,7 +2,9 @@ package apiserver
 
 import (
 	"context"
-	"github.com/turopvin/go-rest-api/internal/app/auth/usecase"
+	authUseCase "github.com/turopvin/go-rest-api/internal/app/auth/usecase"
+	movieUseCase "github.com/turopvin/go-rest-api/internal/app/movie/usecase"
+	"github.com/turopvin/go-rest-api/internal/app/store/external"
 	"github.com/turopvin/go-rest-api/internal/app/store/mongostore"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,10 +20,14 @@ func Start(config *Config) error {
 	defer client.Disconnect(context.TODO())
 
 	//create repository for auth domain and pass it to use case
-	store := mongostore.New(client.Database("dev"))
-	useCase := usecase.New(store.UserRepository())
+	authStore := mongostore.New(client.Database("dev"))
+	authUC := authUseCase.New(authStore.UserRepository())
 
-	srv := newServer(useCase)
+	//create repository for movie domain and pass it to use case
+	movieStore := external.New(config)
+	movieUC := movieUseCase.New(movieStore.MovieRepository())
+
+	srv := newServer(authUC, movieUC)
 	return http.ListenAndServe(config.BindAddr, srv)
 }
 
