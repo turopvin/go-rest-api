@@ -1,6 +1,9 @@
 package model
 
-type Movie struct {
+type ResponseMovie struct {
+}
+
+type TmdbMovie struct {
 	Popularity       float32 `json:"popularity"`
 	VoteCount        int     `json:"vote_count"`
 	Video            bool    `json:"video"`
