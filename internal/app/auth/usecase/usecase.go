@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/turopvin/go-rest-api/internal/app/auth"
@@ -65,4 +66,23 @@ func (a AuthUseCase) SignIn(ctx context.Context, username, password string) (str
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString(a.signingKey)
+}
+
+func (a AuthUseCase) ParseToken(ctx context.Context, accessToken string) (*model.User, error) {
+	token, err := jwt.ParseWithClaims(accessToken, &AuthClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return a.signingKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(*AuthClaims); ok && token.Valid {
+		return claims.User, nil
+	}
+
+	return nil, errors.New("invalid access token")
 }
