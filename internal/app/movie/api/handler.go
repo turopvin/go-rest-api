@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/turopvin/go-rest-api/internal/app/apiserver"
 	"github.com/turopvin/go-rest-api/internal/app/movie"
 	"net/http"
 )
@@ -15,10 +16,11 @@ func New(useCase movie.UseCase) *Handler {
 
 func (h *Handler) findByTitle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		title, err := h.useCase.FindByTitle("")
+		movies, err := h.useCase.FindByTitle("")
 		if err != nil {
-
+			apiserver.SendError(w, r, http.StatusNotFound, nil)
 		}
+		apiserver.SendRespond(w, r, http.StatusOK, movies)
 
 	}
 }
