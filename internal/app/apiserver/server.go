@@ -4,8 +4,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/turopvin/go-rest-api/internal/app/auth"
-	"github.com/turopvin/go-rest-api/internal/app/auth/api"
+	authApi "github.com/turopvin/go-rest-api/internal/app/auth/api"
 	"github.com/turopvin/go-rest-api/internal/app/movie"
+	movieApi "github.com/turopvin/go-rest-api/internal/app/movie/api"
 	"net/http"
 )
 
@@ -14,13 +15,19 @@ type server struct {
 	logger *logrus.Logger
 }
 
-func newServer(auth auth.UseCase, useCase movie.UseCase) *server {
+func newServer(authUseCase auth.UseCase, movieUseCase movie.UseCase) *server {
 	s := &server{
 		router: mux.NewRouter(),
 		logger: logrus.New(),
 	}
 
-	api.RegisterHttpEndPoints(s.router, auth)
+	//register authentication end-points
+	//returns sub-router,
+	//it is used for "authentication-required" functionality
+	subRouter := authApi.RegisterHttpEndPoints(s.router, authUseCase)
+
+	//register private("authentication-required") end-points
+	movieApi.RegisterHttpEndpoints(subRouter, movieUseCase)
 	return s
 }
 

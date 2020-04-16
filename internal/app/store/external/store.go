@@ -9,10 +9,11 @@ import (
 
 type Store struct {
 	movieRepository movie.Repository
+	config          *apiserver.Config
 }
 
 func New(config *apiserver.Config) *Store {
-	return &Store{}
+	return &Store{config: config}
 }
 
 func (s *Store) UserRepository() auth.UserRepository {
@@ -23,6 +24,8 @@ func (s *Store) MovieRepository() movie.Repository {
 	if s.movieRepository != nil {
 		return s.movieRepository
 	}
-
-	mr := &repository.MovieRepository{}
+	t := repository.NewTmdb(s.config.ApiTmdbBaseUrl, s.config.ApiTmdbKey)
+	mr := &repository.MovieRepository{Tmdb: t}
+	s.movieRepository = mr
+	return s.movieRepository
 }
