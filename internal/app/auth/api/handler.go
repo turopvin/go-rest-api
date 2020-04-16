@@ -32,6 +32,7 @@ func (h *Handler) handleSignUp(ctx context.Context) http.HandlerFunc {
 		if err := h.useCase.SignUp(ctx, n.Username, n.Password); err != nil {
 			h.error(w, r, http.StatusBadRequest, err)
 		}
+		h.respond(w, r, http.StatusOK, nil)
 	}
 }
 
@@ -42,11 +43,11 @@ func (h *Handler) handleSignIn(ctx context.Context) http.HandlerFunc {
 			h.error(w, r, http.StatusNotFound, err)
 			return
 		}
-
-		if err := h.useCase.SignIn(ctx, n.Username, n.Password); err != nil {
+		token, err := h.useCase.SignIn(ctx, n.Username, n.Password)
+		if err != nil {
 			h.error(w, r, http.StatusNotFound, err)
-			return
 		}
+		h.respond(w, r, http.StatusOK, token)
 	}
 }
 
