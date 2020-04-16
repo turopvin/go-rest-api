@@ -86,14 +86,3 @@ func (h *handler) handleMovieGet() http.HandlerFunc {
 		h.respond(w, r, http.StatusOK, json.NewEncoder(w).Encode(movies))
 	}
 }
-
-func (h *handler) error(w http.ResponseWriter, r *http.Request, code int, err error) {
-	h.respond(w, r, code, map[string]string{"error": err.Error()})
-}
-
-func (h *handler) respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
-	w.WriteHeader(code)
-	if data != nil {
-		json.NewEncoder(w).Encode(data)
-	}
-}
