@@ -49,3 +49,9 @@ func (h *Handler) handleSignIn() http.HandlerFunc {
 		sendRespond(w, r, http.StatusOK, token)
 	}
 }
+
+func (h *Handler) handleHello() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sendRespond(w, r, http.StatusOK, "hello")
+	}
+}

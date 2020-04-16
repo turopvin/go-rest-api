@@ -15,4 +15,6 @@ func RegisterHttpEndPoints(router *mux.Router, useCase auth.UseCase) {
 
 	private := router.PathPrefix("/api").Subrouter()
 	private.Use(middleware.AuthenticateUser)
+
+	private.HandleFunc("/hello", handler.handleHello())
 }

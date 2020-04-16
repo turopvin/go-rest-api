@@ -6,6 +6,10 @@ import (
 )
 
 func sendError(w http.ResponseWriter, r *http.Request, code int, err error) {
+	if err == nil {
+		sendRespond(w, r, code, nil)
+		return
+	}
 	sendRespond(w, r, code, map[string]string{"error": err.Error()})
 }
 

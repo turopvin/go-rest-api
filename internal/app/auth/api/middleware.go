@@ -29,6 +29,7 @@ func (m *Middleware) AuthenticateUser(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			sendError(w, r, http.StatusUnauthorized, nil)
+			return
 		}
 
 		headerParts := strings.Split(authHeader, " ")
