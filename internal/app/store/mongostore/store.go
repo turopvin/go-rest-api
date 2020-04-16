@@ -3,6 +3,7 @@ package mongostore
 import (
 	"github.com/turopvin/go-rest-api/internal/app/auth"
 	"github.com/turopvin/go-rest-api/internal/app/auth/repository"
+	"github.com/turopvin/go-rest-api/internal/app/movie"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -27,4 +28,8 @@ func (t *Store) UserRepository() auth.UserRepository {
 	}
 	t.userRepository = ur
 	return ur
+}
+
+func (t *Store) MovieRepository() movie.Repository {
+	panic("implement me")
 }

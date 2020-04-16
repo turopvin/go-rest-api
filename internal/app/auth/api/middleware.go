@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"github.com/turopvin/go-rest-api/internal/app/apiserver"
 	"github.com/turopvin/go-rest-api/internal/app/auth"
 	"net/http"
 	"strings"
@@ -18,7 +19,7 @@ type Middleware struct {
 	useCase auth.UseCase
 }
 
-func NewsMiddleware(usecase auth.UseCase) *Middleware {
+func NewMiddleware(usecase auth.UseCase) *Middleware {
 	return &Middleware{
 		useCase: usecase,
 	}
@@ -28,17 +29,18 @@ func (m *Middleware) AuthenticateUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			sendError(w, r, http.StatusUnauthorized, nil)
+			apiserver.SendError(w, r, http.StatusUnauthorized, nil)
+			return
 		}
 
 		headerParts := strings.Split(authHeader, " ")
 		if len(headerParts) != 2 {
-			sendError(w, r, http.StatusUnauthorized, nil)
+			apiserver.SendError(w, r, http.StatusUnauthorized, nil)
 			return
 		}
 
 		if headerParts[0] != "Bearer" {
-			sendError(w, r, http.StatusUnauthorized, nil)
+			apiserver.SendError(w, r, http.StatusUnauthorized, nil)
 			return
 		}
 
@@ -49,7 +51,7 @@ func (m *Middleware) AuthenticateUser(next http.Handler) http.Handler {
 				status = http.StatusUnauthorized
 			}
 
-			sendError(w, r, status, nil)
+			apiserver.SendError(w, r, status, nil)
 			return
 		}
 
