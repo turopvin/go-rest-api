@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/turopvin/go-rest-api/internal/app/auth"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -51,6 +52,7 @@ func (m *Middleware) AuthenticateUser(next http.Handler) http.Handler {
 			}
 
 			SendError(w, r, status, nil)
+			log.Println(err)
 			return
 		}
 
