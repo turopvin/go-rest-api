@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/turopvin/go-rest-api/internal/app/movie/model"
 	"log"
 	"net/http"
@@ -49,21 +50,26 @@ func (m *MovieRepository) FindByTitle(title string) (map[string][]model.Response
 	resultMap := make(map[string][]model.ResponseMovie)
 
 	channel := make(chan chanelStruct)
-	go resultsTmdb(m.MovieApi.ApiTmdbUrl, m.MovieApi.ApiTmdbKey, title, channel)
-	go resultsOmdb(m.MovieApi.ApiOmdbUrl, m.MovieApi.ApiOmdbKey, title, channel)
+	errorChannel := make(chan error)
+	go resultsTmdb(m.MovieApi.ApiTmdbUrl, m.MovieApi.ApiTmdbKey, title, channel, errorChannel)
+	go resultsOmdb(m.MovieApi.ApiOmdbUrl, m.MovieApi.ApiOmdbKey, title, channel, errorChannel)
 
 	for i := 0; i < 2; i++ {
-		result := <-channel
-		resultMap[result.ApiName] = result.Movies
+		select {
+		case result := <-channel:
+			resultMap[result.ApiName] = result.Movies
+		case errorResult := <-errorChannel:
+			return nil, errorResult
+		}
 	}
 
 	return resultMap, nil
 }
 
-func resultsTmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct) {
+func resultsTmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct, errorChannel chan<- error) {
 	tmdbUrl, err := url.Parse(apiUrl)
 	if err != nil {
-		log.Fatal(err)
+		errorChannel <- err
 		return
 	}
 	tmdbUrl.Path = "/3/search/movie"
@@ -75,13 +81,18 @@ func resultsTmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct)
 	tmdbUrl.RawQuery = q.Encode()
 
 	resp, err := http.Get(tmdbUrl.String())
-	if err != nil {
-		log.Fatal(err)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		if err == nil {
+			tmdbErr := errors.New("Request to Tmdb API failed")
+			errorChannel <- tmdbErr
+			log.Println(tmdbErr)
+		}
+		errorChannel <- err
 		return
 	}
 	r := &tmdbResponse{}
 	if err = json.NewDecoder(resp.Body).Decode(r); err != nil {
-		log.Fatal(err)
+		errorChannel <- err
 		return
 	}
 	movies := convertTmdbToResponseMovie(r.Results)
@@ -92,27 +103,35 @@ func resultsTmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct)
 	}
 }
 
-func resultsOmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct) {
+func resultsOmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct, errorChannel chan<- error) {
 	omdbUrl, err := url.Parse(apiUrl)
 	if err != nil {
+		errorChannel <- err
 		return
 	}
-	query := omdbUrl.Query()
-	query.Set("apikey", apiKey)
-	query.Set("t", movieTitle)
-	omdbUrl.RawQuery = query.Encode()
+	q := omdbUrl.Query()
+	q.Set("apikey", apiKey)
+	q.Set("t", movieTitle)
+	omdbUrl.RawQuery = q.Encode()
 
-	get, err := http.Get(omdbUrl.String())
-	if err != nil {
+	resp, err := http.Get(omdbUrl.String())
+	if err != nil || resp.StatusCode != http.StatusOK {
+		if err == nil {
+			omdbErr := errors.New("Request to Omdb API failed")
+			errorChannel <- omdbErr
+			log.Println(omdbErr)
+		}
+		errorChannel <- err
 		return
 	}
-	om := &omdbResponse{}
-	if err := json.NewDecoder(get.Body).Decode(om); err != nil {
+	r := &omdbResponse{}
+	if err := json.NewDecoder(resp.Body).Decode(r); err != nil {
+		errorChannel <- err
 		return
 	}
 	omdbresult := model.ResponseMovie{
-		Title:       om.Title,
-		ReleaseDate: om.Year,
+		Title:       r.Title,
+		ReleaseDate: r.Year,
 	}
 	channel <- chanelStruct{
 		ApiName: "omdb",
