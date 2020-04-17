@@ -21,7 +21,7 @@ func (h *Handler) findByTitle() http.HandlerFunc {
 		}
 		movies, err := h.useCase.FindMoviesByTitle(title)
 		if err != nil {
-			SendError(w, r, http.StatusNotFound, nil)
+			SendError(w, r, http.StatusInternalServerError, nil)
 		}
 		SendRespond(w, r, http.StatusOK, movies)
 
