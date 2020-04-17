@@ -13,7 +13,7 @@ func New(repository movie.Repository) *MovieUseCase {
 	return &MovieUseCase{repository: repository}
 }
 
-func (m *MovieUseCase) FindByTitle(title string) ([]model.ResponseMovie, error) {
+func (m *MovieUseCase) FindMoviesByTitle(title string) (map[string][]model.ResponseMovie, error) {
 	byTitle, err := m.repository.FindByTitle(title)
 	if err != nil {
 		return nil, err

@@ -6,6 +6,8 @@ type Config struct {
 	DatabaseURL    string `toml:"database_url"`
 	ApiTmdbBaseUrl string `toml:"api_tmdb_base_url"`
 	ApiTmdbKey     string `toml:"api_tmdb_key"`
+	ApiOmdbUrl     string `toml:"api_omdb_url"`
+	ApiOmdbKey     string `toml:"api_omdb_key"`
 }
 
 func NewConfig() *Config {

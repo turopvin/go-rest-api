@@ -5,5 +5,5 @@ import (
 )
 
 type Repository interface {
-	FindByTitle(title string) ([]model.ResponseMovie, error)
+	FindByTitle(title string) (map[string][]model.ResponseMovie, error)
 }

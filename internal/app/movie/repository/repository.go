@@ -9,57 +9,92 @@ import (
 )
 
 type MovieRepository struct {
-	Tmdb *tmdb
+	MovieApi *movieApi
 }
 
-type tmdb struct {
-	Apiurl string `toml:"api_tmdb_base_url"`
-	Apikey string `toml:"api_tmdb_key"`
+type movieApi struct {
+	ApiTmdbUrl string
+	ApiTmdbKey string
+	ApiOmdbUrl string
+	ApiOmdbKey string
 }
 
-func NewTmdb(url, key string) *tmdb {
-	return &tmdb{
-		Apiurl: url,
-		Apikey: key,
+func NewTmdb(tmdbUrl, tmdbKey, omdbUrl, omdbKey string) *movieApi {
+	return &movieApi{
+		ApiTmdbUrl: tmdbUrl,
+		ApiTmdbKey: tmdbKey,
+		ApiOmdbUrl: omdbUrl,
+		ApiOmdbKey: omdbKey,
 	}
 }
 
-type response struct {
+type tmdbResponse struct {
 	Page         int               `json:"page"`
 	TotalResults int               `json:"total_results"`
 	TotalPages   int               `json:"total_pages"`
 	Results      []model.TmdbMovie `json:"results"`
 }
 
-func (m *MovieRepository) FindByTitle(title string) ([]model.ResponseMovie, error) {
-	u, err := url.Parse(m.Tmdb.Apiurl)
+type omdbResponse struct {
+	Title string `json:"Title"`
+	Year  string `json:"Year"`
+}
+
+func (m *MovieRepository) FindByTitle(title string) (map[string][]model.ResponseMovie, error) {
+	resultMap := make(map[string][]model.ResponseMovie)
+	//movieApi API
+	tmdbUrl, err := url.Parse(m.MovieApi.ApiTmdbUrl)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
-	u.Path = "/3/search/movie"
-	q := u.Query()
-	q.Set("api_key", m.Tmdb.Apikey)
+	tmdbUrl.Path = "/3/search/movie"
+	q := tmdbUrl.Query()
+	q.Set("api_key", m.MovieApi.ApiTmdbKey)
 	q.Set("language", "en-US")
 	q.Set("query", title)
 	q.Set("include_adult", "false")
-	u.RawQuery = q.Encode()
+	tmdbUrl.RawQuery = q.Encode()
 
-	resp, err := http.Get(u.String())
+	resp, err := http.Get(tmdbUrl.String())
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
-	r := &response{}
+	r := &tmdbResponse{}
 	if err = json.NewDecoder(resp.Body).Decode(r); err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
+	tmdbMovies := convertTmdbToResponseMovie(r.Results)
+	resultMap["tmdbMovies"] = tmdbMovies
+	//omdbAPI
+	omdbUrl, err := url.Parse(m.MovieApi.ApiOmdbUrl)
+	if err != nil {
+		return nil, err
+	}
+	query := omdbUrl.Query()
+	query.Set("apikey", m.MovieApi.ApiOmdbKey)
+	query.Set("t", title)
+	omdbUrl.RawQuery = query.Encode()
 
-	return convertToResponseMovie(r.Results), nil
+	get, err := http.Get(omdbUrl.String())
+	if err != nil {
+		return nil, err
+	}
+	om := &omdbResponse{}
+	if err := json.NewDecoder(get.Body).Decode(om); err != nil {
+		return nil, err
+	}
+	omdbresult := model.ResponseMovie{
+		Title:       om.Title,
+		ReleaseDate: om.Year,
+	}
+	resultMap["omdbresults"] = []model.ResponseMovie{omdbresult}
+	return resultMap, nil
 }
 
-func convertToResponseMovie(tmdbMovies []model.TmdbMovie) []model.ResponseMovie {
+func convertTmdbToResponseMovie(tmdbMovies []model.TmdbMovie) []model.ResponseMovie {
 	var responseSlice []model.ResponseMovie
 	for _, tmdb := range tmdbMovies {
 		r := model.ResponseMovie{
@@ -70,3 +105,15 @@ func convertToResponseMovie(tmdbMovies []model.TmdbMovie) []model.ResponseMovie 
 	}
 	return responseSlice
 }
+
+//func convertOmdbToResponseMovie(omdbMovies []omdbResponse) []model.ResponseMovie  {
+//	var responseSlice []model.ResponseMovie
+//	for _, omdb := range omdbMovies{
+//		r := model.ResponseMovie{
+//			Title:       omdb.Title,
+//			ReleaseDate: omdb.Year,
+//		}
+//		responseSlice = append(responseSlice, r)
+//	}
+//	return responseSlice
+//}

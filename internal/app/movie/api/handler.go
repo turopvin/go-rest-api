@@ -15,11 +15,11 @@ func New(useCase movie.UseCase) *Handler {
 
 func (h *Handler) findByTitle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		title := r.URL.Query()["film_title"]
+		title := r.URL.Query().Get("title")
 		if len(title) < 1 {
 			SendRespond(w, r, http.StatusBadRequest, nil)
 		}
-		movies, err := h.useCase.FindByTitle("")
+		movies, err := h.useCase.FindMoviesByTitle(title)
 		if err != nil {
 			SendError(w, r, http.StatusNotFound, nil)
 		}

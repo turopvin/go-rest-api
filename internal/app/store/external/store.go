@@ -24,8 +24,13 @@ func (s *Store) MovieRepository() movie.Repository {
 	if s.movieRepository != nil {
 		return s.movieRepository
 	}
-	t := repository.NewTmdb(s.config.ApiTmdbBaseUrl, s.config.ApiTmdbKey)
-	mr := &repository.MovieRepository{Tmdb: t}
+	t := repository.NewTmdb(
+		s.config.ApiTmdbBaseUrl,
+		s.config.ApiTmdbKey,
+		s.config.ApiOmdbUrl,
+		s.config.ApiOmdbKey,
+	)
+	mr := &repository.MovieRepository{MovieApi: t}
 	s.movieRepository = mr
 	return s.movieRepository
 }
