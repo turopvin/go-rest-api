@@ -40,58 +40,87 @@ type omdbResponse struct {
 	Year  string `json:"Year"`
 }
 
+type chanelStruct struct {
+	ApiName string                `json:"api_name"`
+	Movies  []model.ResponseMovie `json:"movies"`
+}
+
 func (m *MovieRepository) FindByTitle(title string) (map[string][]model.ResponseMovie, error) {
 	resultMap := make(map[string][]model.ResponseMovie)
-	//movieApi API
-	tmdbUrl, err := url.Parse(m.MovieApi.ApiTmdbUrl)
+
+	tmdb := make(chan chanelStruct)
+	omdb := make(chan chanelStruct)
+	go resultsTmdb(m.MovieApi.ApiTmdbUrl, m.MovieApi.ApiTmdbKey, title, tmdb)
+	go resultsOmdb(m.MovieApi.ApiOmdbUrl, m.MovieApi.ApiOmdbKey, title, omdb)
+
+	select {
+	case s := <-tmdb:
+		resultMap[s.ApiName] = s.Movies
+	case s := <-omdb:
+		resultMap[s.ApiName] = s.Movies
+	}
+
+	return resultMap, nil
+}
+
+func resultsTmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct) {
+	tmdbUrl, err := url.Parse(apiUrl)
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
+		return
 	}
 	tmdbUrl.Path = "/3/search/movie"
 	q := tmdbUrl.Query()
-	q.Set("api_key", m.MovieApi.ApiTmdbKey)
+	q.Set("api_key", apiKey)
 	q.Set("language", "en-US")
-	q.Set("query", title)
+	q.Set("query", movieTitle)
 	q.Set("include_adult", "false")
 	tmdbUrl.RawQuery = q.Encode()
 
 	resp, err := http.Get(tmdbUrl.String())
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
+		return
 	}
 	r := &tmdbResponse{}
 	if err = json.NewDecoder(resp.Body).Decode(r); err != nil {
 		log.Fatal(err)
-		return nil, err
+		return
 	}
-	tmdbMovies := convertTmdbToResponseMovie(r.Results)
-	resultMap["tmdbMovies"] = tmdbMovies
-	//omdbAPI
-	omdbUrl, err := url.Parse(m.MovieApi.ApiOmdbUrl)
+	movies := convertTmdbToResponseMovie(r.Results)
+
+	channel <- chanelStruct{
+		ApiName: "tmdb",
+		Movies:  movies,
+	}
+}
+
+func resultsOmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct) {
+	omdbUrl, err := url.Parse(apiUrl)
 	if err != nil {
-		return nil, err
+		return
 	}
 	query := omdbUrl.Query()
-	query.Set("apikey", m.MovieApi.ApiOmdbKey)
-	query.Set("t", title)
+	query.Set("apikey", apiKey)
+	query.Set("t", movieTitle)
 	omdbUrl.RawQuery = query.Encode()
 
 	get, err := http.Get(omdbUrl.String())
 	if err != nil {
-		return nil, err
+		return
 	}
 	om := &omdbResponse{}
 	if err := json.NewDecoder(get.Body).Decode(om); err != nil {
-		return nil, err
+		return
 	}
 	omdbresult := model.ResponseMovie{
 		Title:       om.Title,
 		ReleaseDate: om.Year,
 	}
-	resultMap["omdbresults"] = []model.ResponseMovie{omdbresult}
-	return resultMap, nil
+	channel <- chanelStruct{
+		ApiName: "omdb",
+		Movies:  []model.ResponseMovie{omdbresult},
+	}
 }
 
 func convertTmdbToResponseMovie(tmdbMovies []model.TmdbMovie) []model.ResponseMovie {
@@ -105,15 +134,3 @@ func convertTmdbToResponseMovie(tmdbMovies []model.TmdbMovie) []model.ResponseMo
 	}
 	return responseSlice
 }
-
-//func convertOmdbToResponseMovie(omdbMovies []omdbResponse) []model.ResponseMovie  {
-//	var responseSlice []model.ResponseMovie
-//	for _, omdb := range omdbMovies{
-//		r := model.ResponseMovie{
-//			Title:       omdb.Title,
-//			ReleaseDate: omdb.Year,
-//		}
-//		responseSlice = append(responseSlice, r)
-//	}
-//	return responseSlice
-//}
