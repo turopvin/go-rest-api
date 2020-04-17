@@ -21,3 +21,8 @@ type TmdbMovie struct {
 	Overview         string  `json:"overview"`
 	ReleaseDate      string  `json:"release_date"`
 }
+
+type ChannelMovie struct {
+	ApiName string          `json:"api_name"`
+	Movies  []ResponseMovie `json:"movies"`
+}

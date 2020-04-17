@@ -41,15 +41,10 @@ type omdbResponse struct {
 	Year  string `json:"Year"`
 }
 
-type chanelStruct struct {
-	ApiName string                `json:"api_name"`
-	Movies  []model.ResponseMovie `json:"movies"`
-}
-
 func (m *MovieRepository) FindByTitle(title string) (map[string][]model.ResponseMovie, error) {
 	resultMap := make(map[string][]model.ResponseMovie)
 
-	channel := make(chan chanelStruct)
+	channel := make(chan model.ChannelMovie)
 	errorChannel := make(chan error)
 	go resultsTmdb(m.MovieApi.ApiTmdbUrl, m.MovieApi.ApiTmdbKey, title, channel, errorChannel)
 	go resultsOmdb(m.MovieApi.ApiOmdbUrl, m.MovieApi.ApiOmdbKey, title, channel, errorChannel)
@@ -66,7 +61,7 @@ func (m *MovieRepository) FindByTitle(title string) (map[string][]model.Response
 	return resultMap, nil
 }
 
-func resultsTmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct, errorChannel chan<- error) {
+func resultsTmdb(apiUrl, apiKey, movieTitle string, channel chan<- model.ChannelMovie, errorChannel chan<- error) {
 	tmdbUrl, err := url.Parse(apiUrl)
 	if err != nil {
 		errorChannel <- err
@@ -97,13 +92,13 @@ func resultsTmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct,
 	}
 	movies := convertTmdbToResponseMovie(r.Results)
 
-	channel <- chanelStruct{
+	channel <- model.ChannelMovie{
 		ApiName: "tmdb",
 		Movies:  movies,
 	}
 }
 
-func resultsOmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct, errorChannel chan<- error) {
+func resultsOmdb(apiUrl, apiKey, movieTitle string, channel chan<- model.ChannelMovie, errorChannel chan<- error) {
 	omdbUrl, err := url.Parse(apiUrl)
 	if err != nil {
 		errorChannel <- err
@@ -133,7 +128,7 @@ func resultsOmdb(apiUrl, apiKey, movieTitle string, channel chan<- chanelStruct,
 		Title:       r.Title,
 		ReleaseDate: r.Year,
 	}
-	channel <- chanelStruct{
+	channel <- model.ChannelMovie{
 		ApiName: "omdb",
 		Movies:  []model.ResponseMovie{omdbresult},
 	}
