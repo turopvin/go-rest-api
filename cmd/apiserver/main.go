@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/BurntSushi/toml"
 	"github.com/turopvin/go-rest-api/internal/app/apiserver"
+	config2 "github.com/turopvin/go-rest-api/internal/app/config"
 	"log"
 )
 
@@ -18,7 +19,7 @@ func init() {
 func main() {
 	flag.Parse()
 
-	config := apiserver.NewConfig()
+	config := config2.NewConfig()
 	_, err := toml.DecodeFile(configPath, config)
 	if err != nil {
 		log.Fatal(err)

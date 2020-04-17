@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"errors"
-	"github.com/turopvin/go-rest-api/internal/app/apiserver"
 	"github.com/turopvin/go-rest-api/internal/app/auth"
 	"net/http"
 	"strings"
@@ -29,18 +28,18 @@ func (m *Middleware) AuthenticateUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			apiserver.SendError(w, r, http.StatusUnauthorized, nil)
+			SendError(w, r, http.StatusUnauthorized, nil)
 			return
 		}
 
 		headerParts := strings.Split(authHeader, " ")
 		if len(headerParts) != 2 {
-			apiserver.SendError(w, r, http.StatusUnauthorized, nil)
+			SendError(w, r, http.StatusUnauthorized, nil)
 			return
 		}
 
 		if headerParts[0] != "Bearer" {
-			apiserver.SendError(w, r, http.StatusUnauthorized, nil)
+			SendError(w, r, http.StatusUnauthorized, nil)
 			return
 		}
 
@@ -51,7 +50,7 @@ func (m *Middleware) AuthenticateUser(next http.Handler) http.Handler {
 				status = http.StatusUnauthorized
 			}
 
-			apiserver.SendError(w, r, status, nil)
+			SendError(w, r, status, nil)
 			return
 		}
 

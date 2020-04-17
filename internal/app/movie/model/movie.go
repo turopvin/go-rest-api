@@ -1,6 +1,8 @@
 package model
 
 type ResponseMovie struct {
+	Title       string
+	ReleaseDate string
 }
 
 type TmdbMovie struct {

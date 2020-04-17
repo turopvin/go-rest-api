@@ -3,6 +3,7 @@ package apiserver
 import (
 	"context"
 	authUseCase "github.com/turopvin/go-rest-api/internal/app/auth/usecase"
+	"github.com/turopvin/go-rest-api/internal/app/config"
 	movieUseCase "github.com/turopvin/go-rest-api/internal/app/movie/usecase"
 	"github.com/turopvin/go-rest-api/internal/app/store/external"
 	"github.com/turopvin/go-rest-api/internal/app/store/mongostore"
@@ -12,7 +13,7 @@ import (
 	"net/http"
 )
 
-func Start(config *Config) error {
+func Start(config *config.Config) error {
 	client, err := createDbClient(config)
 	if err != nil {
 		return err
@@ -31,7 +32,7 @@ func Start(config *Config) error {
 	return http.ListenAndServe(config.BindAddr, srv)
 }
 
-func createDbClient(config *Config) (*mongo.Client, error) {
+func createDbClient(config *config.Config) (*mongo.Client, error) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(config.DatabaseURL))
 	if err != nil {
 		return nil, err

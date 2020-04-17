@@ -1,18 +1,18 @@
 package external
 
 import (
-	"github.com/turopvin/go-rest-api/internal/app/apiserver"
 	"github.com/turopvin/go-rest-api/internal/app/auth"
+	config2 "github.com/turopvin/go-rest-api/internal/app/config"
 	"github.com/turopvin/go-rest-api/internal/app/movie"
 	"github.com/turopvin/go-rest-api/internal/app/movie/repository"
 )
 
 type Store struct {
 	movieRepository movie.Repository
-	config          *apiserver.Config
+	config          *config2.Config
 }
 
-func New(config *apiserver.Config) *Store {
+func New(config *config2.Config) *Store {
 	return &Store{config: config}
 }
 
