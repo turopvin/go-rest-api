@@ -1,5 +1,6 @@
 package model
 
+//is used for client response
 type ResponseMovie struct {
 	Title       string
 	ReleaseDate string
