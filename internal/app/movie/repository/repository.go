@@ -48,16 +48,13 @@ type chanelStruct struct {
 func (m *MovieRepository) FindByTitle(title string) (map[string][]model.ResponseMovie, error) {
 	resultMap := make(map[string][]model.ResponseMovie)
 
-	tmdb := make(chan chanelStruct)
-	omdb := make(chan chanelStruct)
-	go resultsTmdb(m.MovieApi.ApiTmdbUrl, m.MovieApi.ApiTmdbKey, title, tmdb)
-	go resultsOmdb(m.MovieApi.ApiOmdbUrl, m.MovieApi.ApiOmdbKey, title, omdb)
+	channel := make(chan chanelStruct)
+	go resultsTmdb(m.MovieApi.ApiTmdbUrl, m.MovieApi.ApiTmdbKey, title, channel)
+	go resultsOmdb(m.MovieApi.ApiOmdbUrl, m.MovieApi.ApiOmdbKey, title, channel)
 
-	select {
-	case s := <-tmdb:
-		resultMap[s.ApiName] = s.Movies
-	case s := <-omdb:
-		resultMap[s.ApiName] = s.Movies
+	for i := 0; i < 2; i++ {
+		result := <-channel
+		resultMap[result.ApiName] = result.Movies
 	}
 
 	return resultMap, nil
