@@ -56,5 +56,17 @@ func (m *MovieRepository) FindByTitle(title string) ([]model.ResponseMovie, erro
 		return nil, err
 	}
 
-	return r.Results, nil
+	return convertToResponseMovie(r.Results), nil
+}
+
+func convertToResponseMovie(tmdbMovies []model.TmdbMovie) []model.ResponseMovie {
+	var responseSlice []model.ResponseMovie
+	for _, tmdb := range tmdbMovies {
+		r := model.ResponseMovie{
+			Title:       tmdb.Title,
+			ReleaseDate: tmdb.ReleaseDate,
+		}
+		responseSlice = append(responseSlice, r)
+	}
+	return responseSlice
 }
