@@ -38,6 +38,10 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 	omdbresult := model.ResponseMovie{
 		Title:       r.Title,
 		ReleaseDate: r.Year,
+		Director:    r.Director,
+		ImdbRating:  r.ImdbRating,
+		Actors:      r.Actors,
+		Description: r.Plot,
 	}
 	channel <- model.ChannelMovie{
 		ApiName: "omdb",
