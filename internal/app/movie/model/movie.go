@@ -26,6 +26,18 @@ type TmdbMovie struct {
 	VoteAverage      float32 `json:"vote_average"`
 	Overview         string  `json:"overview"`
 	ReleaseDate      string  `json:"release_date"`
+	TrailerLink      string  `json:"trailer_link"`
+}
+
+type TmdbMovieVideos struct {
+	Id         string `json:"id"`
+	Iso639_1   string `json:"iso_639_1"`
+	Iso3166_1  string `json:"iso_3166_1"`
+	YoutubeKey string `json:"key"`
+	Name       string `json:"name"`
+	Site       string `json:"site"`
+	Size       string `json:"size"`
+	Type       string `json:"type"`
 }
 
 type OmdbMovie struct {
