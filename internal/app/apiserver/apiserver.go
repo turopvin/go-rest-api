@@ -41,6 +41,7 @@ func createDbClient(config *config.Config) (*mongo.Client, error) {
 		log.Fatal(err)
 	}
 	if err := client.Ping(context.TODO(), nil); err != nil {
+		log.Println("couldn't connect to DB")
 		return nil, err
 	}
 	return client, nil
