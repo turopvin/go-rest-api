@@ -9,11 +9,6 @@ import (
 	"net/url"
 )
 
-type omdbResponse struct {
-	Title string `json:"Title"`
-	Year  string `json:"Year"`
-}
-
 func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.ChannelMovie, errorChannel chan<- error) {
 	omdbUrl, err := url.Parse(apiUrl)
 	if err != nil {
@@ -35,7 +30,7 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 		errorChannel <- err
 		return
 	}
-	r := &omdbResponse{}
+	r := &model.OmdbMovie{}
 	if err := json.NewDecoder(resp.Body).Decode(r); err != nil {
 		errorChannel <- err
 		return
