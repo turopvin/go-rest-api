@@ -2,31 +2,31 @@ package model
 
 //is used for client response
 type ResponseMovie struct {
-	Title       string
-	ReleaseDate string
-	Director    string
-	ImdbRating  string
-	Actors      string
-	Description string
-	TrailerLink string
+	Title        string
+	ReleaseDate  string
+	Director     string
+	ImdbRating   string
+	Actors       string
+	Description  string
+	TrailerLinks []string
 }
 
 type TmdbMovie struct {
-	Popularity       float32 `json:"popularity"`
-	VoteCount        int     `json:"vote_count"`
-	Video            bool    `json:"video"`
-	PosterPath       string  `json:"poster_path"`
-	Id               int     `json:"id"`
-	Adult            bool    `json:"adult"`
-	BackdropPath     string  `json:"backdrop_path"`
-	OriginalLanguage string  `json:"original_language"`
-	OriginalTitle    string  `json:"original_title"`
-	GenreIds         []int   `json:"genre_ids"`
-	Title            string  `json:"title"`
-	VoteAverage      float32 `json:"vote_average"`
-	Overview         string  `json:"overview"`
-	ReleaseDate      string  `json:"release_date"`
-	TrailerLink      string  `json:"trailer_link"`
+	Popularity       float32  `json:"popularity"`
+	VoteCount        int      `json:"vote_count"`
+	Video            bool     `json:"video"`
+	PosterPath       string   `json:"poster_path"`
+	Id               int      `json:"id"`
+	Adult            bool     `json:"adult"`
+	BackdropPath     string   `json:"backdrop_path"`
+	OriginalLanguage string   `json:"original_language"`
+	OriginalTitle    string   `json:"original_title"`
+	GenreIds         []int    `json:"genre_ids"`
+	Title            string   `json:"title"`
+	VoteAverage      float32  `json:"vote_average"`
+	Overview         string   `json:"overview"`
+	ReleaseDate      string   `json:"release_date"`
+	TrailerLinks     []string `json:"trailer_links"`
 }
 
 type TmdbMovieVideos struct {
@@ -36,7 +36,7 @@ type TmdbMovieVideos struct {
 	YoutubeKey string `json:"key"`
 	Name       string `json:"name"`
 	Site       string `json:"site"`
-	Size       string `json:"size"`
+	Size       int    `json:"size"`
 	Type       string `json:"type"`
 }
 
