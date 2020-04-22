@@ -3,17 +3,23 @@ package tmdb
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/turopvin/go-rest-api/internal/app/movie/model"
 	"log"
 	"net/http"
 	"net/url"
 )
 
-type tmdbResponse struct {
+type tmdbMovieResponse struct {
 	Page         int               `json:"page"`
 	TotalResults int               `json:"total_results"`
 	TotalPages   int               `json:"total_pages"`
 	Results      []model.TmdbMovie `json:"results"`
+}
+
+type tmdbMovieVideosResponse struct {
+	Id      int                     `json:"id"`
+	Results []model.TmdbMovieVideos `json:"results"`
 }
 
 func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.ChannelMovie, errorChannel chan<- error) {
@@ -40,11 +46,41 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 		errorChannel <- err
 		return
 	}
-	r := &tmdbResponse{}
+	r := &tmdbMovieResponse{}
 	if err = json.NewDecoder(resp.Body).Decode(r); err != nil {
 		errorChannel <- err
 		return
 	}
+
+	tmbdMovieVideoUrl, _ := url.Parse(apiUrl)
+	query := tmbdMovieVideoUrl.Query()
+	query.Set("api_key", apiKey)
+	tmbdMovieVideoUrl.RawQuery = query.Encode()
+	for _, v := range r.Results {
+
+		tmbdMovieVideoUrl.Path = fmt.Sprintf("/3/movie/%v/videos", v.Id)
+		response, err := http.Get(tmbdMovieVideoUrl.String())
+		if err != nil || resp.StatusCode != http.StatusOK {
+			if err == nil {
+				tmdbErr := errors.New("Request to Tmdb API failed")
+				errorChannel <- tmdbErr
+				log.Println(tmdbErr)
+			}
+			errorChannel <- err
+			return
+		}
+		r := &tmdbMovieVideosResponse{}
+		if err := json.NewDecoder(response.Body).Decode(r); err != nil {
+			errorChannel <- err
+		}
+
+		var trailerLinks []string
+		for _, v := range r.Results {
+			trailerLinks = append(trailerLinks, "https://www.youtube.com/watch?v="+v.YoutubeKey)
+		}
+		v.TrailerLinks = trailerLinks
+	}
+
 	movies := convertTmdbToResponseMovie(r.Results)
 
 	channel <- model.ChannelMovie{
@@ -57,8 +93,10 @@ func convertTmdbToResponseMovie(tmdbMovies []model.TmdbMovie) []model.ResponseMo
 	var responseSlice []model.ResponseMovie
 	for _, tmdb := range tmdbMovies {
 		r := model.ResponseMovie{
-			Title:       tmdb.Title,
-			ReleaseDate: tmdb.ReleaseDate,
+			Title:        tmdb.Title,
+			ReleaseDate:  tmdb.ReleaseDate,
+			Description:  tmdb.Overview,
+			TrailerLinks: tmdb.TrailerLinks,
 		}
 		responseSlice = append(responseSlice, r)
 	}
