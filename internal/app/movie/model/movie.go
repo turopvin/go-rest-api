@@ -5,6 +5,10 @@ type ResponseMovie struct {
 	Title       string
 	ReleaseDate string
 	Director    string
+	ImdbRating  string
+	Actors      string
+	Description string
+	TrailerLink string
 }
 
 type TmdbMovie struct {
