@@ -58,7 +58,7 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 		return
 	}
 
-	movieVideosChannel := make(chan videoLinkChannel)
+	movieVideosChannel := make(chan videoLinkChannel, len(r.Results))
 	prepareVideoLinks(r, apiUrl, apiKey, movieVideosChannel, errorChannel)
 
 	for movie := range movieVideosChannel {
@@ -103,6 +103,7 @@ func prepareVideoLinks(r *tmdbMovieResponse, apiUrl, apiKey string, movieVideosC
 			}
 			movieResp := &tmdbMovieVideosResponse{}
 			if err := json.NewDecoder(response.Body).Decode(movieResp); err != nil {
+				log.Println(err)
 				errorChannel <- err
 			}
 
