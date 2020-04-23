@@ -78,7 +78,7 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 }
 
 func prepareVideoLinks(r *tmdbMovieResponse, apiUrl, apiKey string, movieVideosChannel chan<- videoLinkChannel, errorChannel chan<- error) {
-	defer close(movieVideosChannel)
+	//defer close(movieVideosChannel)
 
 	tmbdMovieVideoUrl, _ := url.Parse(apiUrl)
 	query := tmbdMovieVideoUrl.Query()
