@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"time"
+	"sync"
 )
 
 type tmdbMovieResponse struct {
@@ -78,12 +78,15 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 }
 
 func prepareVideoLinks(r *tmdbMovieResponse, apiUrl, apiKey string, movieVideosChannel chan<- videoLinkChannel, errorChannel chan<- error) {
-	//defer close(movieVideosChannel)
+	defer close(movieVideosChannel)
 
 	tmbdMovieVideoUrl, _ := url.Parse(apiUrl)
 	query := tmbdMovieVideoUrl.Query()
 	query.Set("api_key", apiKey)
 	tmbdMovieVideoUrl.RawQuery = query.Encode()
+
+	var wg sync.WaitGroup
+	wg.Add(len(r.Results))
 
 	for _, v := range r.Results {
 		go func(movieId int, movieVideoChannel chan<- videoLinkChannel) {
@@ -112,10 +115,11 @@ func prepareVideoLinks(r *tmdbMovieResponse, apiUrl, apiKey string, movieVideosC
 				MovieId: movieId,
 				Links:   trailerLinks,
 			}
+			wg.Done()
 		}(v.Id, movieVideosChannel)
 	}
-	<-time.After(time.Second * 5)
-	close(movieVideosChannel)
+
+	wg.Wait()
 }
 
 func convertTmdbToResponseMovie(tmdbMovies []model.TmdbMovie) []model.ResponseMovie {
