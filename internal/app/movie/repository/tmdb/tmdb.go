@@ -56,7 +56,7 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 	query := tmbdMovieVideoUrl.Query()
 	query.Set("api_key", apiKey)
 	tmbdMovieVideoUrl.RawQuery = query.Encode()
-	for _, v := range r.Results {
+	for i, v := range r.Results {
 
 		tmbdMovieVideoUrl.Path = fmt.Sprintf("/3/movie/%v/videos", v.Id)
 		response, err := http.Get(tmbdMovieVideoUrl.String())
@@ -69,16 +69,16 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 			errorChannel <- err
 			return
 		}
-		r := &tmdbMovieVideosResponse{}
-		if err := json.NewDecoder(response.Body).Decode(r); err != nil {
+		movieResp := &tmdbMovieVideosResponse{}
+		if err := json.NewDecoder(response.Body).Decode(movieResp); err != nil {
 			errorChannel <- err
 		}
 
 		var trailerLinks []string
-		for _, v := range r.Results {
-			trailerLinks = append(trailerLinks, "https://www.youtube.com/watch?v="+v.YoutubeKey)
+		for _, v := range movieResp.Results {
+			trailerLinks = append(trailerLinks, fmt.Sprintf("https://www.youtube.com/watch?v=%v", v.YoutubeKey))
 		}
-		v.TrailerLinks = trailerLinks
+		r.Results[i].TrailerLinks = trailerLinks
 	}
 
 	movies := convertTmdbToResponseMovie(r.Results)
