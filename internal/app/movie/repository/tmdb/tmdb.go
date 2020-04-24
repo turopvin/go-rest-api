@@ -58,9 +58,9 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 		return
 	}
 
+	//populate movies with trailer links
 	movieVideosChannel := make(chan videoLinkChannel)
 	go prepareVideoLinks(r, apiUrl, apiKey, movieVideosChannel, errorChannel)
-
 	for movie := range movieVideosChannel {
 		for i, m := range r.Results {
 			if movie.MovieId == m.Id {
