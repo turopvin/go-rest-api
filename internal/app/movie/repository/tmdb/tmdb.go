@@ -29,32 +29,9 @@ type videoLinkChannel struct {
 }
 
 func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.ChannelMovie, errorChannel chan<- error) {
-	tmdbUrl, err := url.Parse(apiUrl)
-	if err != nil {
-		errorChannel <- err
-		return
-	}
-	tmdbUrl.Path = "/3/search/movie"
-	q := tmdbUrl.Query()
-	q.Set("api_key", apiKey)
-	q.Set("language", "en-US")
-	q.Set("query", movieTitle)
-	q.Set("include_adult", "false")
-	tmdbUrl.RawQuery = q.Encode()
-
-	resp, err := http.Get(tmdbUrl.String())
-	if err != nil || resp.StatusCode != http.StatusOK {
-		if err == nil {
-			tmdbErr := errors.New("Request to Tmdb API failed")
-			errorChannel <- tmdbErr
-			log.Println(tmdbErr)
-		}
-		errorChannel <- err
-		return
-	}
-	r := &tmdbMovieResponse{}
-	if err = json.NewDecoder(resp.Body).Decode(r); err != nil {
-		errorChannel <- err
+	//get general movie info
+	r := movieResponse(apiUrl, apiKey, movieTitle, errorChannel)
+	if r == nil {
 		return
 	}
 
@@ -75,6 +52,38 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 		ApiName: "tmdb",
 		Movies:  movies,
 	}
+}
+
+func movieResponse(apiUrl, apiKey, movieTitle string, errorChannel chan<- error) *tmdbMovieResponse {
+	tmdbUrl, err := url.Parse(apiUrl)
+	if err != nil {
+		errorChannel <- err
+		return nil
+	}
+	tmdbUrl.Path = "/3/search/movie"
+	q := tmdbUrl.Query()
+	q.Set("api_key", apiKey)
+	q.Set("language", "en-US")
+	q.Set("query", movieTitle)
+	q.Set("include_adult", "false")
+	tmdbUrl.RawQuery = q.Encode()
+
+	resp, err := http.Get(tmdbUrl.String())
+	if err != nil || resp.StatusCode != http.StatusOK {
+		if err == nil {
+			tmdbErr := errors.New("Request to Tmdb API failed")
+			errorChannel <- tmdbErr
+			log.Println(tmdbErr)
+		}
+		errorChannel <- err
+		return nil
+	}
+	r := &tmdbMovieResponse{}
+	if err = json.NewDecoder(resp.Body).Decode(r); err != nil {
+		errorChannel <- err
+		return nil
+	}
+	return r
 }
 
 func prepareVideoLinks(r *tmdbMovieResponse, apiUrl, apiKey string, movieVideosChannel chan<- videoLinkChannel, errorChannel chan<- error) {
