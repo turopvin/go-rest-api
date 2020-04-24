@@ -58,8 +58,8 @@ func MovieByTitle(apiUrl, apiKey, movieTitle string, channel chan<- model.Channe
 		return
 	}
 
-	movieVideosChannel := make(chan videoLinkChannel, len(r.Results))
-	prepareVideoLinks(r, apiUrl, apiKey, movieVideosChannel, errorChannel)
+	movieVideosChannel := make(chan videoLinkChannel)
+	go prepareVideoLinks(r, apiUrl, apiKey, movieVideosChannel, errorChannel)
 
 	for movie := range movieVideosChannel {
 		for i, m := range r.Results {
