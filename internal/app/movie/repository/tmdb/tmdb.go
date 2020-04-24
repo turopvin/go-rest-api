@@ -95,10 +95,10 @@ func prepareVideoLinks(r *tmdbMovieResponse, apiUrl, apiKey string, movieVideosC
 	tmbdMovieVideoUrl.RawQuery = query.Encode()
 
 	var wg sync.WaitGroup
-	wg.Add(len(r.Results))
-
 	for _, v := range r.Results {
+		wg.Add(1)
 		go func(movieId int, movieVideoChannel chan<- videoLinkChannel) {
+			defer wg.Done()
 			tmbdMovieVideoUrl.Path = fmt.Sprintf("/3/movie/%v/videos", movieId)
 			response, err := http.Get(tmbdMovieVideoUrl.String())
 			if err != nil || response.StatusCode != http.StatusOK {
@@ -125,7 +125,6 @@ func prepareVideoLinks(r *tmdbMovieResponse, apiUrl, apiKey string, movieVideosC
 				MovieId: movieId,
 				Links:   trailerLinks,
 			}
-			wg.Done()
 		}(v.Id, movieVideosChannel)
 	}
 
